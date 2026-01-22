@@ -32,7 +32,7 @@ class CategoryController extends Controller
         return ResponseHelper::success("تمت إضافة الصنف" , $category);
     }
 
-    
+
 
     /**
      * Update the specified resource in storage.
@@ -53,10 +53,14 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
-        $category = Category::find($id);
+        if ($category->books()->count() > 0) {
+            return ResponseHelper::failed('لا يمكن حذف هذا الصنف لوجود كتب مرتبطة به');
+        }
+
         $category->delete();
+
         return ResponseHelper::success("تم حذف الصنف" , $category);
     }
 }
