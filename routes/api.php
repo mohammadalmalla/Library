@@ -21,7 +21,7 @@ Route::get('test/{x}' , function($x1){
 Route::get('categories' , [CategoryController::class,  'index']);
 Route::post('categories' , [CategoryController::class,  'store']);
 Route::put('categories/{identifier}' , [CategoryController::class,  'update']);
-Route::delete('categories/{id}' , [CategoryController::class,  'destroy']);
+Route::delete('categories/{category}' , [CategoryController::class,  'destroy']);
 
 Route::get('authors',[AuthorController::class,'index']);
 Route::get('authors/{id}',[AuthorController::class,'show']);
