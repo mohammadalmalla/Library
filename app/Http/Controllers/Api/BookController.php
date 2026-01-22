@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\StoreBookRequest;
 use App\Http\Requests\Book\UpdateBookRequest;
 use App\Models\Book;
+use App\Models\Category;
 use App\ResponseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,8 @@ class BookController extends Controller
 {
     public function index()
     {
-        $book = Book::all();
+        $book = Book::with(['category','authors'])->get();
+
         return ResponseHelper::success(' جميع الكتب', $book);
     }
 
@@ -25,8 +27,10 @@ class BookController extends Controller
      */
     public function store(StoreBookRequest $request)
     {
-        //  return $request->all();
         $book = Book::create($request->validated());
+
+        //ربط المؤلفين
+        $book->authors()->attach($request->authors);
 
         if ($request->hasFile('cover')){
             $file = $request->file('cover');
@@ -43,7 +47,7 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //
+        return ResponseHelper::success('',$book->load(['Category','authors']));
     }
 
 
@@ -53,6 +57,21 @@ class BookController extends Controller
     public function update(UpdateBookRequest $request, Book $book)
     {
         $book->update($request->validated());
+
+        $book->authors()->when(
+        $request->filled('authors'),
+        fn ($q) => $q->sync($request->authors)
+         );
+
+        $request->whenHasFile('image', function () use ($book, $request) {
+            optional($book->image, fn ($img) => Storage::delete($img));
+
+        $book->update([
+            'image' => $request->file('image')->store('books')
+        ]);
+
+        });
+
         return ResponseHelper::success("تمت تعديل الكتاب", $book);
 
     }
@@ -62,7 +81,12 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
+        if ($book->image && Storage::exists($book->image)) {
+        Storage::delete($book->image);
+        }
+
         $book->delete();
+
         return ResponseHelper::success("تمت حذف الكتاب", $book);
     }
 }

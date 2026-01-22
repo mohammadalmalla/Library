@@ -28,6 +28,9 @@ class StoreBookRequest extends FormRequest
             'mortgage' => 'required|boolean',
             'authorship_date' => 'required|date|before_or_equal:today',
             'category_id' => 'required|integer|exists:categories,id',
+
+            'authors' => 'required|array',
+            'authors.*' => 'exists:authors,id'
         ];
     }
 }

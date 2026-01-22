@@ -30,6 +30,9 @@ class UpdateBookRequest extends FormRequest
             'mortgage' => 'sometimes|required|boolean',
             'authorship_date' => 'sometimes|required|date|before_or_equal:today',
             'category_id' => 'sometimes|required|integer|exists:categories,id',
+
+            'authors' => 'sometimes|required|array',
+            'authors.*' => 'exists:authors,id'
         ];
     }
 }
